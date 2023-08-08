@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 6: Projeto: To-do API</title>
+</head>
+<body>
+    
+<h1>Módulo 6: Projeto: To-do API</h1>
+<p>7 aulas</p>
+
+<pre>
+
+<h3>#1: Criando o projeto e configurando</h3>
+
+$ git clone https://github.com/suporteb7web/node-base-api.git b7-nodejs-mod06-todo
+
+
+--- 
+b7-nodejs-mod06-todo/.env 
+--- 
+PORT=4000
+
+PG_DB=b7_nodejs_mod06_todo
+PG_USER=root
+PG_PASSWORD=root
+PG_PORT=8889
+
+
+--- 
+npm install
+
+<hr>
+<h3>#2: Criando o model e tabela</h3>
+
+--- 
+b7-nodejs-mod06-todo/src/models/todo.ts
+--- 
+
+
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../instances/pg';
+
+export interface TodoInstance extends Model {
+    id: number;
+    title: string;
+    done: boolean;
+}
+
+export const Todo = sequelize.define<TodoInstance>('Todo', {
+    id: {
+        primaryKey: true,
+        autoIncrement: true, 
+        type: DataTypes.INTEGER
+    },
+    title: {
+        type: DataTypes.STRING
+    },
+    done: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
+}, {
+    tableName: 'Todos',
+    timestamps: false
+});
+
+<hr>
+<h3>#3: Criando as rotas</h3>
+
+--- 
+b7-nodejs-mod06-todo/src/routes/api.ts
+--- 
+import { Router } from 'express';
+
+import * as TodoController from '../controllers/todo.controller';
+
+const router = Router();
+
+// crud
+router.get('/todo', TodoController.all);
+router.post('/todo', TodoController.add);
+router.put('/todo/:id', TodoController.update);
+router.delete('/todo/:id', TodoController.remove); // delete é uma palavra que não vai funcionar
+
+export default router;
+
+
+--- 
+b7-nodejs-mod06-todo/src/controllers/todo.controller.ts
+--- 
+import { Request, Response } from 'express';
+import { Todo } from '../models/todo';
+
+export const all = async () => {
+    
+}
+
+export const add = async () => {
+    
+}
+
+export const update = async () => {
+    
+}
+
+export const remove = async () => {
+    
+}
+
+<hr>
+<h3>#4: Listando as tarefas</h3>
+
+
+>> Error: Please install mysql2 package manually
+>> npm install mysql2 --save
+
+--- 
+b7-nodejs-mod06-todo/src/controllers/todo.controller.ts
+--- 
+
+
+import { Request, Response } from 'express';
+import { Todo } from '../models/todo';
+
+
+export const all = async (req: Request, res: Response) => {
+    const list = await Todo.findAll();
+    res.json({ list });
+}
+
+export const add = async (req: Request, res: Response) => {
+    
+}
+
+export const update = async (req: Request, res: Response) => {
+    
+}
+
+export const remove = async (req: Request, res: Response) => {
+    
+}
+
+
+<hr>
+<h3>#5: Criando uma nova tarefa</h3>
+
+--- 
+b7-nodejs-mod06-todo/src/controllers/todo.controller.ts
+---
+
+export const add = async (req: Request, res: Response) => {
+    if(req.body.title){
+        let newTodo = await Todo.create({
+            title: req.body.title,
+            done: req.body.done ? true : false
+        });
+        res.status(201).json({item: newTodo});
+    } else {
+        res.json({ error: 'Dados não enviados' });
+    }
+}
+
+<hr>
+<h3>#6: Atualizando uma tarefa</h3>
+
+--- 
+b7-nodejs-mod06-todo/src/controllers/todo.controller.ts
+--- 
+
+export const update = async (req: Request, res: Response) => {
+    const id: string = req.params.id;
+
+    let todo = await Todo.findByPk(id);
+
+    if(todo){
+
+        if(req.body.title){
+            todo.title = req.body.title;
+        }
+
+        if(req.body.done){
+            switch ( req.body.done.toLowerCase() ) {
+                case 'true': 
+                case '1': 
+                    todo.done = true;
+                    break;
+
+                case 'false': 
+                case '0': 
+                    todo.done = false;
+                    break;
+            }
+        }
+
+        await todo.save();
+        res.json({todo});
+
+    } else {
+        res.json({ error: 'Item não encontrado' });
+    }
+    
+}
+
+<hr>
+<h3>#7: Excluindo uma tarefa</h3>
+
+--- 
+b7-nodejs-mod06-todo/src/controllers/todo.controller.ts
+--- 
+
+export const remove = async (req: Request, res: Response) => {
+
+    let id: string = req.params.id;
+
+    let todo = await Todo.findByPk(id);
+
+    if(todo){
+        await todo.destroy();
+    }
+
+    res.json({});
+}
+
+</pre>
+
+
+</body>
+</html>
